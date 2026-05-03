@@ -1,18 +1,50 @@
-Bu projenin temel amacı, Playwright’ın web otomasyon yetenekleri ile yapay zeka (AI) modellerini birleştirerek, web üzerinde karmaşık görevleri otonom bir şekilde yerine getirebilen akıllı bir "AI Agent" (Yapay Zeka Ajanı) geliştirmektir.
+🤖 AI-Powered Self-Healing Test Agent
+Bu proje, modern yazılım test süreçlerini yapay zeka ile otomatize eden, kendi hatalarını teşhis edip düzeltebilen (self-healing) ve Page Object Model (POM) mimarisini kullanan gelişmiş bir test ajanıdır.
 
-Projenin teknik ve fonksiyonel kapsamını şu üç ana başlıkta özetleyebiliriz:
+🌟 Öne Çıkan Özellikler
+Self-Healing (Kendi Kendini İyileştirme): Test koşumu sırasında bir hata (fail) oluştuğunda, ajan hatayı analiz eder, kodu otomatik olarak düzeltir ve testi yeniden koşturur.
 
-1. Akıllı Web Otomasyonu ve Test
-Proje, sıradan bir otomasyon aracından farklı olarak, web sayfalarındaki elementleri tanıma ve etkileşime geçme süreçlerini yapay zeka desteğiyle yönetir. Özellikle bir Software Test Engineer bakış açısıyla kurgulandığı için, hata yakalama (bug detection) ve kullanıcı senaryolarını simüle etme konusunda yüksek doğruluk hedefler.
+POM-Driven Code Generation: Üretilen test kodları, projedeki mevcut pages/ klasöründeki Page Object sınıflarını baz alır. Bu, sürdürülebilir ve temiz kod üretimini garanti eder.
 
-2. Teknik Altyapı ve Güvenilirlik
-Çoklu Tarayıcı Desteği: Playwright Core sayesinde Chromium, Firefox ve WebKit gibi farklı motorlar üzerinde sorunsuz çalışabilir.
+Multi-Agent Architecture: Süreç; Planner (planlama), Coder (kodlama), Runner (koşturma) ve Fixer (düzeltme) birimlerinden oluşan modüler bir yapıya sahiptir.
 
-Tip Güvenliği (Type Safety): json-schema-to-ts kullanımıyla, gelen veriler veya şemalar otomatik olarak TypeScript arayüzlerine dönüştürülür. Bu da kodun çalışma anında hata verme riskini minimize eder.
+TypeScript & Playwright: Endüstri standardı olan hızlı, güvenilir ve modern test araçları üzerine inşa edilmiştir.
 
-Dinamik Veri İşleme: Proje, Anthropic gibi LLM (Büyük Dil Modeli) API'lerini kullanarak sayfadaki metinleri anlamlandırabilir ve bir sonraki adımın ne olması gerektiğine karar verebilir.
+🏗️ Mimari Yapı
+Proje, yazılım test mühendisliği prensiplerine sadık kalarak şu hiyerarşi ile kurgulanmıştır:
 
-3. Profesyonel Standartlar ve Hedefler
-Bu çalışma sadece teknik bir kod yığını değil, aynı zamanda ISTQB standartlarına ve modern yazılım test metodolojilerine (Test Çeyrekleri vb.) uygun bir altyapı sunmayı amaçlar. Geliştirilen bu ajan, karmaşık UI bileşenlerini test etmek ve tekrar eden manuel işleri otomatize etmek için tasarlanmıştır.
+📂 pages/: Uygulama sayfalarının elementlerini ve metodlarını barındıran Page Object sınıfları.
 
-Kısacası proje; bir web tarayıcısını "gören", "anlayan" ve "karar veren" bir yazılım asistanı inşa etme sürecidir
+📂 generated/: AI tarafından dinamik olarak üretilen TypeScript test dosyaları.
+
+⚙️ agent.js: Tüm süreci (Plan -> Code -> Run -> Fix) yöneten ana orkestrasyon dosyası.
+
+🔧 fixer.js: Hata mesajlarını ve mevcut DOM yapısını analiz ederek iyileştirme yapan birim.
+
+🚀 Başlangıç
+Gereksinimler
+Node.js (v18+)
+
+Anthropic API Anahtarı (Claude 3.5 Haiku)
+
+Kurulum ve Çalıştırma
+Depoyu klonlayın: git clone [https://github.com/dilsahgursoy/ai-agent.git](https://github.com/dilsahgursoy/ai-agent.git)
+
+Bağımlılıkları yükleyin: npm install
+
+.env dosyasını oluşturun ve API anahtarınızı ekleyin: ANTHROPIC_API_KEY=your_key_here
+
+Ajanı başlatın:
+
+Bash
+node agent.js
+📊 Örnek Akış (Workflow)
+Ajan bir görev aldığında (örneğin: "Login sayfasını test et") şu döngüyü tamamlar:
+
+Planner: Sayfadaki kritik kullanıcı senaryolarını (pozitif/negatif) belirler.
+
+Coder: Projedeki pages/LoginPage.ts dosyasını referans alarak TypeScript kodunu yazar.
+
+Runner: Testleri Playwright ile farklı tarayıcılarda koşturur.
+
+Fixer: Eğer bir assertion hatası alınırsa, kodu otomatik revize ederek başarıya ulaşana kadar (max 3 deneme) süreci yönetir.
