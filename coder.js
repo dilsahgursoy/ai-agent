@@ -5,7 +5,11 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-async function generateTest(plan) {
+/**
+ * @param {Object} plan - Test adımlarını içeren plan
+ * @param {string} pageObjects - pages/ klasöründeki dosyaların içeriği
+ */
+async function generateTest(plan, pageObjects) {
   const res = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 4000,
@@ -15,20 +19,25 @@ async function generateTest(plan) {
         content: `
         Create a Playwright test suite in TypeScript based on this plan: ${JSON.stringify(plan)}
         
-        STRICT RULES FOR STABLE & NON-FLAKY TESTS:
-        1. Use Web-First Assertions: Always use "await expect(locator).to..." 
-        2. Priority Locators: Use getByRole, getByLabel, getByText, or getByPlaceholder. 
-        3. No Hardcoded Waits: Never use page.waitForTimeout(). 
-        4. No CSS/XPath: Do not use .class or #id unless absolutely necessary.
-        5. Independence: Each test must navigate to the URL independently.
-        6. Clean Output: Return only pure TypeScript code, no markdown labels.
+        CONTEXT - AVAILABLE PAGE OBJECTS:
+        Use the following Page Object classes found in the project. Import them from '../pages/filename':
+        ${pageObjects}
+
+        STRICT RULES FOR POM-BASED TESTS:
+        1. **POM Priority**: Always use the provided Page Object classes and their methods.
+        2. **Imports**: Ensure you import the Page Object classes correctly (e.g., import { LoginPage } from '../pages/LoginPage').
+        3. **Web-First Assertions**: Always use "await expect(locator).to..." for final checks.
+        4. **Priority Locators**: If you must create a new locator, use getByRole, getByLabel, or getByPlaceholder.
+        5. **No Hardcoded Waits**: Never use page.waitForTimeout().
+        6. **Clean Output**: Return ONLY pure TypeScript code. No explanations, no markdown blocks.
         `
       }
     ]
   });
 
+  // Gelen yanıtı temizleyip döndürüyoruz
   return res.content[0].text
-    .replace(/```javascript/g, "")
+    .replace(/```(?:typescript|javascript|js|ts)?/gi, "")
     .replace(/```/g, "")
     .trim();
 }

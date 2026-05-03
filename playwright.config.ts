@@ -2,22 +2,30 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './generated',
-  fullyParallel: true, // Testleri paralel koşturarak hızlandırır
-  retries: 2,          // Flaky testleri otomatik olarak 2 kez daha dener
-  workers: undefined,  // İşlemci gücüne göre otomatik worker atar
-  reporter: 'html',    // Rapor formatı
+  fullyParallel: true, 
+  retries: 2,          
+  workers: 4,  
+  reporter: 'html',    
   
   use: {
     baseURL: 'https://practicetestautomation.com',
-    trace: 'on-first-retry', // İlk hata aldığında tüm süreci kaydeder (Hata ayıklamak için dev özelliktir)
-    screenshot: 'only-on-failure', // Sadece fail eden testlerde ekran görüntüsü alır
-    actionTimeout: 10000, // Tıklama gibi aksiyonlar için 10sn limit
+    trace: 'on-first-retry', 
+    screenshot: 'only-on-failure', 
+    actionTimeout: 10000, 
   },
 
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
     },
   ],
 });
