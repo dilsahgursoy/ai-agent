@@ -15,4 +15,4 @@ Dinamik Veri İşleme: Proje, Anthropic gibi LLM (Büyük Dil Modeli) API'lerini
 3. Profesyonel Standartlar ve Hedefler
 Bu çalışma sadece teknik bir kod yığını değil, aynı zamanda ISTQB standartlarına ve modern yazılım test metodolojilerine (Test Çeyrekleri vb.) uygun bir altyapı sunmayı amaçlar. Geliştirilen bu ajan, karmaşık UI bileşenlerini test etmek ve tekrar eden manuel işleri otomatize etmek için tasarlanmıştır.
 
-Kısacası proje; bir web tarayıcısını "gören", "anlayan" ve "karar veren" bir yazılım asistanı inşa etme sürecidir.
+Kısacası proje; bir web tarayıcısını "gören", "anlayan" ve "karar veren" bir yazılım asistanı inşa etme sürecidir
