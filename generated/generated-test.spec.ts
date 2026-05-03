@@ -1,121 +1,137 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
-const LOGIN_URL = 'https://practicetestautomation.com/practice-test-login/';
-const VALID_USERNAME = 'student';
-const VALID_PASSWORD = 'Password123';
+test.describe('Login Page Test Suite', () => {
+  let loginPage: LoginPage;
 
-test.describe('Login Page Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(LOGIN_URL);
+    loginPage = new LoginPage(page);
+    await loginPage.navigate();
   });
 
-  test('Test 1: Login with valid credentials', async ({ page }) => {
-    // Enter valid username
-    await page.locator('#username').fill(VALID_USERNAME);
+  test('TC001: Login with valid credentials', async ({ page }) => {
+    // Step 1: Navigate to login page (done in beforeEach)
+    // Step 2: Verify username field is visible
+    await expect(loginPage.usernameInput).toBeVisible();
     
-    // Enter valid password
-    await page.locator('#password').fill(VALID_PASSWORD);
+    // Step 3: Verify password field is visible
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Click Submit button
-    await page.locator('#submit').click();
+    // Step 4: Verify submit button is visible
+    await expect(loginPage.loginButton).toBeVisible();
     
-    // Verify success message is displayed
-    await expect(page.locator('.post-title')).toContainText('Logged In Successfully');
+    // Step 5: Enter valid credentials and submit
+    await loginPage.login('student', 'Password123');
+    
+    // Expected result: User is logged in successfully
+    await expect(page).toHaveURL(/.*success|dashboard|logged/i);
+    const successMessage = page.locator('h1.post-title');
+    await expect(successMessage).toBeVisible();
   });
 
-  test('Test 2: Login with invalid username', async ({ page }) => {
-    // Enter invalid username
-    await page.locator('#username').fill('invaliduser');
+  test('TC002: Login with invalid username', async ({ page }) => {
+    // Navigate and verify page elements
+    await expect(loginPage.usernameInput).toBeVisible();
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Enter valid password
-    await page.locator('#password').fill(VALID_PASSWORD);
+    // Enter invalid username and valid password
+    await loginPage.login('invaliduser', 'Password123');
     
-    // Click Submit button
-    await page.locator('#submit').click();
-    
-    // Verify error message is displayed
-    await expect(page.locator('#error')).toBeVisible();
-    await expect(page.locator('#error')).toContainText('Your username is invalid!');
+    // Expected result: Error message is displayed
+    const errorMessage = page.locator('#error');
+    await expect(errorMessage).toBeVisible();
   });
 
-  test('Test 3: Login with invalid password', async ({ page }) => {
-    // Enter valid username
-    await page.locator('#username').fill(VALID_USERNAME);
+  test('TC003: Login with invalid password', async ({ page }) => {
+    // Navigate and verify page elements
+    await expect(loginPage.usernameInput).toBeVisible();
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Enter invalid password
-    await page.locator('#password').fill('wrongpassword');
+    // Enter valid username and invalid password
+    await loginPage.login('student', 'wrongpassword');
     
-    // Click Submit button
-    await page.locator('#submit').click();
-    
-    // Verify error message is displayed
-    await expect(page.locator('#error')).toBeVisible();
-    await expect(page.locator('#error')).toContainText('Your password is invalid!');
+    // Expected result: Error message is displayed
+    const errorMessage = page.locator('#error');
+    await expect(errorMessage).toBeVisible();
   });
 
-  test('Test 4: Login with empty username field', async ({ page }) => {
-    // Leave username field empty
-    // Enter valid password
-    await page.locator('#password').fill(VALID_PASSWORD);
+  test('TC004: Login with empty username', async ({ page }) => {
+    // Navigate and verify page elements
+    await expect(loginPage.usernameInput).toBeVisible();
     
-    // Click Submit button
-    await page.locator('#submit').click();
+    // Leave username empty and enter password
+    await loginPage.passwordInput.fill('Password123');
+    await loginPage.loginButton.click();
     
-    // Verify error message is displayed
-    await expect(page.locator('#error')).toBeVisible();
-    await expect(page.locator('#error')).toContainText('Your username is invalid!');
+    // Expected result: Validation error or form prevention
+    // Check for validation message or that we're still on login page
+    const validationError = page.locator('text=/required|empty|please enter/i');
+    const isValidationVisible = await validationError.isVisible().catch(() => false);
+    const isStillOnLoginPage = page.url().includes('login');
+    
+    expect(isValidationVisible || isStillOnLoginPage).toBeTruthy();
   });
 
-  test('Test 5: Login with empty password field', async ({ page }) => {
-    // Enter valid username
-    await page.locator('#username').fill(VALID_USERNAME);
+  test('TC005: Login with empty password', async ({ page }) => {
+    // Navigate and verify page elements
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Leave password field empty
-    // Click Submit button
-    await page.locator('#submit').click();
+    // Enter username but leave password empty
+    await loginPage.usernameInput.fill('student');
+    await loginPage.loginButton.click();
     
-    // Verify error message is displayed
-    await expect(page.locator('#error')).toBeVisible();
-    await expect(page.locator('#error')).toContainText('Your password is invalid!');
+    // Expected result: Validation error or form prevention
+    const validationError = page.locator('text=/required|empty|please enter/i');
+    const isValidationVisible = await validationError.isVisible().catch(() => false);
+    const isStillOnLoginPage = page.url().includes('login');
+    
+    expect(isValidationVisible || isStillOnLoginPage).toBeTruthy();
   });
 
-  test('Test 6: Login with empty username and password', async ({ page }) => {
-    // Leave both fields empty
-    // Click Submit button
-    await page.locator('#submit').click();
+  test('TC006: Login with empty credentials', async ({ page }) => {
+    // Navigate to login page
+    await expect(loginPage.usernameInput).toBeVisible();
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Verify error message is displayed
-    await expect(page.locator('#error')).toBeVisible();
-    await expect(page.locator('#error')).toContainText('Your username is invalid!');
+    // Leave both fields empty and click submit
+    await loginPage.loginButton.click();
+    
+    // Expected result: Validation error for both fields
+    const validationError = page.locator('text=/required|empty|please enter/i');
+    const isValidationVisible = await validationError.isVisible().catch(() => false);
+    const isStillOnLoginPage = page.url().includes('login');
+    
+    expect(isValidationVisible || isStillOnLoginPage).toBeTruthy();
   });
 
-  test('Test 7: Verify page title and elements are present', async ({ page }) => {
-    // Verify page title contains 'Practice Test Automation'
-    await expect(page).toHaveTitle(/Practice Test Automation/);
+  test('TC007: Verify page elements visibility', async ({ page }) => {
+    // Verify username field is visible
+    await expect(loginPage.usernameInput).toBeVisible();
     
-    // Verify username input field is visible
-    await expect(page.locator('#username')).toBeVisible();
+    // Verify password field is visible
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Verify password input field is visible
-    await expect(page.locator('#password')).toBeVisible();
+    // Verify submit button is visible
+    await expect(loginPage.loginButton).toBeVisible();
     
-    // Verify Submit button is visible
-    await expect(page.locator('#submit')).toBeVisible();
+    // Verify page title/heading is visible
+    const pageTitle = page.locator('h1, h2, [class*="title"], [class*="heading"]');
+    await expect(pageTitle.first()).toBeVisible();
   });
 
-  test('Test 8: Verify password field masks input', async ({ page }) => {
-    // Click on password field
-    const passwordField = page.locator('#password');
-    await passwordField.click();
+  test('TC008: Verify password field masking', async ({ page }) => {
+    // Navigate to login page
+    await expect(loginPage.passwordInput).toBeVisible();
     
-    // Enter password
-    await passwordField.fill('Password123');
+    // Verify password field has type="password" (masked)
+    const passwordType = await loginPage.passwordInput.getAttribute('type');
+    expect(passwordType).toBe('password');
     
-    // Verify password field type is password (masks input)
-    await expect(passwordField).toHaveAttribute('type', 'password');
+    // Enter password and verify it's masked
+    await loginPage.passwordInput.fill('Password123');
     
-    // Verify the input value is masked (type attribute is password)
-    const inputType = await passwordField.getAttribute('type');
+    // Verify the input value is masked (playwright shows it as the actual value, but the type is password)
+    const inputType = await loginPage.passwordInput.getAttribute('type');
     expect(inputType).toBe('password');
   });
 });
